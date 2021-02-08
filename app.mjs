@@ -14,9 +14,12 @@ import { normalizePort,
          handel404,
          basicErrorHandler} from './appsupport.mjs';
 import { router as indexRouter } from './routes/index.mjs';
+import { InMemoryNotesStore } from './models/notes-memory.mjs';
 // import { router as notesRouter} from './routes/notes.mjs';
 
 export const app = express();
+
+export const NotesStore = new InMemoryNotesStore
 
 //view engine setup
 app.set('views', path.join(__dirname, 'views'));
