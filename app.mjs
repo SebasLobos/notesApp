@@ -17,9 +17,9 @@ import { router as indexRouter } from './routes/index.mjs';
 import { InMemoryNotesStore } from './models/notes-memory.mjs';
 import { router as notesRouter} from './routes/notes.mjs';
 
+export const NotesStore = new InMemoryNotesStore()
 export const app = express();
 
-export const NotesStore = new InMemoryNotesStore
 
 //view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -39,6 +39,8 @@ app.use('/assets/vendor/jquery', express.static(
     path.join(__dirname, 'node_modules', 'jquery', 'dist')));
 app.use('/assets/vendor/popper.js', express.static(
     path.join(__dirname, 'node_modules', 'popper.js', 'dist', 'umd')));
+app.use('/assets/vendor/feather-icons', express.static(
+    path.join(__dirname, 'node_modules', 'feather-icons', 'dist')));
 
 //Router function list
 app.use('/', indexRouter);

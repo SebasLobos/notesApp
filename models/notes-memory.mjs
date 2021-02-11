@@ -11,7 +11,7 @@ export class InMemoryNotesStore extends AbstractNotesStore {
         return notes[key];
     }
 
-    async crete (key, title, body){
+    async create (key, title, body){
         notes[key] = new Note (key, title, body);
         return notes[key];
     }
