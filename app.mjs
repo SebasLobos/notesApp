@@ -3,6 +3,10 @@ import { default as hbs } from 'hbs';
 import * as path from 'path';
 //import * as favicon from 'serve-favicon';
 import { default as logger } from 'morgan';
+import { default as rfs } from 'rotating-file-stream';
+import { default as DBG } from 'debug';
+const debug = DBG('noteApp:debug');
+const dbgerror = DBG('noteApp:error');
 import { default as cookieParser } from 'cookie-parser';
 import { default as bodyParser } from 'body-parser';
 import * as http from 'http';
@@ -14,12 +18,14 @@ import { normalizePort,
          handel404,
          basicErrorHandler} from './appsupport.mjs';
 import { router as indexRouter } from './routes/index.mjs';
-import { InMemoryNotesStore } from './models/notes-memory.mjs';
 import { router as notesRouter} from './routes/notes.mjs';
+import { useModel as useNotesModel } from './models/notes-store.mjs';
 
-export const NotesStore = new InMemoryNotesStore()
+useNotesModel(process.env.NOTES_MODEL ? process.env.NOTES_MODEL : "memory")
+.then(store => { debug(`Using NotesStore ${store}`); })
+.catch(error => { onError({ code: 'ENOTESSTORE', error }); });
+
 export const app = express();
-
 
 //view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -28,7 +34,15 @@ hbs.registerPartials( path.join(__dirname, 'partials'));
 
 //uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+app.use(logger(process.env.REQUEST_LOG_FORMAT || 'dev', {
+    stream: process.env.REQUEST_LOG_FILE ?
+        rfs.createStream(process.env.REQUEST_LOG_FILE, {
+            size: '10M',
+            interval: '1d',
+            compress: 'gzip'    
+        })
+        : process.stdout    
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
@@ -57,5 +71,9 @@ app.set('port', port);
 
 export const server = http.createServer(app);
 server.listen(port);
+server.on('request', (req, res) => {
+    debug(`${new Date().toISOString()} request ${req.method} 
+    ${req.url}}`);
+ });
 server.on('error', onError);
 server.on('listening', OnListening);

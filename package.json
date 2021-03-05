@@ -1,9 +1,11 @@
 {
-  "name": "noteapp",
+  "name": "notepp",
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "cross-env DEBUG=noteApp:* node ./app.mjs"
+    "start": "cross-env DEBUG=noteApp:* node ./app.mjs",
+    "sqlite3-setup": "sqlite3 mydatabase.sqlite3 --init models/schema-sqlite3.sql",
+    "sqlite3-start": "cross-env SQLITE_FILE=mydatabase.sqlite3 DEBUG=notes:* NOTES_MODEL=sqlite3 node ./app.mjs"
   },
   "dependencies": {
     "bootstrap": "^4.5.3",
@@ -16,6 +18,8 @@
     "http-errors": "~1.6.3",
     "jquery": "^3.5.1",
     "morgan": "~1.9.1",
-    "popper.js": "^1.16.1"
+    "popper.js": "^1.16.1",
+    "rotating-file-stream": "^2.1.4",
+    "sqlite3": "^5.0.2"
   }
 }

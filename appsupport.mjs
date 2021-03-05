@@ -1,5 +1,18 @@
 import { server } from './app.mjs';
 import { port } from './app.mjs';
+import { default as DBG } from 'debug';
+import * as util from 'util';
+
+const debug = DBG('noteApp:debug');
+const dbgerror = DBG('noteApp:error');
+
+process.on('uncaughtException', (err) => {
+    console.error(`I've crashed!!! - ${err.stack || err}`)
+});
+
+process.on('unhandledRejection', (reason, p) => {
+    console.error(`Unhandled Rejection at: ${util.inspect(p)} reason: ${reason}`);
+});
 
 export function normalizePort(val){
     const port = parseInt(val, 10);
@@ -13,6 +26,7 @@ export function normalizePort(val){
 }
 
 export function onError (error) {
+    dbgerror(error);
     if (error.syscall !== 'listen'){
         throw error;
     }
@@ -29,6 +43,11 @@ export function onError (error) {
             console.error(`${bind} is already in use`);
             process.exit(1);
             break;
+        case 'ENOTESSTORE':
+            console.error(`Notes data store initialization failure because `,
+            error.error);
+            process.exit(1);
+            break;    
         default:
             throw error;        
     }           
@@ -39,7 +58,7 @@ export function OnListening(){
     const bind = typeof addr === 'string'
                ? 'pipe ' + addr
                : 'port ' + addr.port;
-    console.log(`Listening on ${bind}`);           
+    debug(`Listening on ${bind}`);           
 };
 
 export function handel404( req, res, next){
